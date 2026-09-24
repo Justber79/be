@@ -516,6 +516,10 @@ export default async function opportunityRoutes(
         relations: ["address.postcode", "agentPerson"],
       });
       if (!agent) {
+        request.log.warn(
+          { agentId },
+          "Opportunity creation rejected because the selected NGO was not found.",
+        );
         throw new NotFoundError("The selected NGO could not be found.");
       }
 
@@ -524,6 +528,10 @@ export default async function opportunityRoutes(
       // deal.postcode_id is NOT NULL, so a missing postcode here would
       // otherwise reach the DB as an unhandled constraint violation.
       if (!agent.address?.postcode?.value) {
+        request.log.warn(
+          { agentId },
+          "Opportunity creation rejected because the selected NGO has no postcode.",
+        );
         throw new BadRequestError(
           "The selected NGO's address must include a postcode before creating an opportunity.",
         );
@@ -817,6 +825,10 @@ export default async function opportunityRoutes(
           where: { id: agentLinkId },
         });
         if (!linkedAgent) {
+          request.log.warn(
+            { agentId: agentLinkId, opportunityId: opportunity.id },
+            "Opportunity relink rejected because the selected NGO was not found.",
+          );
           throw new NotFoundError("The selected NGO could not be found.");
         }
       }
